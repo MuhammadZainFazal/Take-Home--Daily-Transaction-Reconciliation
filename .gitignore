@@ -12,3 +12,4 @@ obj/
 .vscode/
 .DS_Store
 states/
+reports/
