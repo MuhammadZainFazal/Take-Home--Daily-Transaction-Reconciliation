@@ -52,11 +52,9 @@ def run(date: str, data_dir: Path, state_dir: Path) -> int:
 
     # Compare today's rows together with rows from still-open findings,
     # so a row that was missing yesterday can be found on the other side today.
+    # A row present in both lists is collapsed inside reconcile and update.
     carried_p, carried_l = carried_rows(state)
-    pool_p = list(dict.fromkeys(carried_p + provider))  # dict.fromkeys drops repeats, keeps order
-    pool_l = list(dict.fromkeys(carried_l + ledger))
-
-    result = reconcile(pool_p, pool_l)
+    result = reconcile(carried_p + provider, carried_l + ledger)
     changes = update(state, date, result.findings)
     state["runs"][date] = {"checksum": digest}
     save(state_path, state)  # one write at the end: a failed run leaves no trace

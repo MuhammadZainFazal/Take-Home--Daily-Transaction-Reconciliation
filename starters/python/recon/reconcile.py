@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import defaultdict
 
 from .models import (
@@ -24,15 +26,8 @@ def _split_by_id_presence(txs: list[Transaction]) -> tuple[dict[str, list[Transa
 
 
 def _drop_exact_copies(rows: list[Transaction]) -> list[Transaction]:
-    """Rows with the same ID, amount and timestamp are the same line repeated: keep one."""
-    seen: set[tuple[int, object]] = set()
-    kept: list[Transaction] = []
-    for t in rows:
-        k = (t.amount_cents, t.timestamp)
-        if k not in seen:
-            seen.add(k)
-            kept.append(t)
-    return kept
+    """Collapse rows that are identical in every field: the same line repeated."""
+    return list(dict.fromkeys(rows))
 
 
 def reconcile(provider: list[Transaction], ledger: list[Transaction]) -> Result:
