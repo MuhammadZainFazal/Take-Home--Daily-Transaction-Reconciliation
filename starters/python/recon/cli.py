@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .readers import load_day
 from .report import write_csv
+from .summary import render_summary
 from .reconcile import reconcile
 from .state import carried_rows, checksum, load, save, update
 
@@ -53,14 +54,14 @@ def run(date: str, data_dir: Path, state_dir: Path, report_dir: Path) -> int:
     still_open = open_total - len(changes.new)  # open before today, not repeated in the report
     report_path = report_dir / f"report-{date}.csv"
     write_csv(report_path, changes)
+    summary = render_summary(date, provider, ledger, result.matched, changes, still_open)
+    (report_dir / f"summary-{date}.txt").write_text(summary, encoding="utf-8")
 
     # State is saved last: if anything above failed, the date is not marked as processed
     # and can simply be run again.
     save(state_path, state)
 
-    print(f"{date}: read {len(provider):,} provider and {len(ledger):,} ledger rows, {result.matched:,} matched.")
-    print(f"{len(changes.new)} new items, {len(changes.resolved)} resolved, "
-          f"{still_open} still open from earlier days (not repeated in the report).")
+    print(summary)
     print(f"Report: {report_path}")
     return 0
 

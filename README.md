@@ -27,9 +27,9 @@ On Windows, install the time zone database once: `pip install tzdata`. Python re
 | `--state-dir` | `states/` | where `state.json` is kept |
 | `--report-dir` | `reports/` | where the CSV reports are written |
 
-Each run writes `reports/report-DATE.csv`, updates `states/state.json`, and prints a short summary (rows read, matched, new items, resolved, still open). Run dates in order.
+Each run writes `reports/report-DATE.csv` (the items to check) and `reports/summary-DATE.txt` (does the day's total match, and how many items need attention), updates `states/state.json`, and prints the summary. Run dates in order.
 
-Tests: `python -m unittest` from `starters/python`. There are ten small ones: each matching rule once, plus re-running a date, the next day reporting only changes, and refusing changed files.
+Tests: `python -m unittest` from `starters/python`. There are twelve small ones: each matching rule once, plus re-running a date, the next day reporting only changes, refusing changed files, and two for the totals summary.
 
 If a date has already been processed with the same files, the tool says so and does nothing. If the files for that date have changed since, it refuses and says why (see question 7 in `docs/QUESTIONS.md`).
 
@@ -50,6 +50,8 @@ Rows are matched on the transaction ID and nothing else. Amount, time and mercha
 
 **Reading the report.** It is a CSV for Excel: one row per record, except that the two sides of an amount difference share a row. Columns are Status, Issue, Transaction ID, Time (Amsterdam), Merchant, Provider ref, Provider amount, Ledger ref, Ledger amount, Difference, Note. A real example is in `docs/sample_report-2026-03-01.csv`.
 
+**Does the total match?** `summary-DATE.txt` answers that first: both totals, the difference and which side is higher. Totals are the sums of the two files exported for that date, to the cent. Matching totals do not mean every transaction matches (two errors can cancel out), so the summary always says how many items need attention. A real example is in `docs/sample_summary-2026-03-01.txt`.
+
 **Day 1 result.** 1,986 provider rows and 1,986 ledger rows. 1,953 matched. 59 findings (61 CSV rows): 5 amount differences, 1 repeated ID, 7 missing in the ledger, 9 missing at the provider, 37 rows with no ID.
 
 ## Repository layout
@@ -66,6 +68,7 @@ starters/python/recon/
   reconcile.py                 the comparison: a pure function, no files or state
   state.py                     the JSON state, the diff, the re-run guard
   report.py                    writes the CSV
+  summary.py                   the short answer: do the day's totals match
   cli.py                       ties the steps together
 starters/python/tests/         the small test suite
 states/, reports/              created at run time
@@ -79,7 +82,7 @@ states/, reports/              created at run time
 ## With another day
 
 - More tests. The suite covers the basics only: not unreadable input, the report layout, or a resolved finding that comes back.
-- Put the summary counts into the deliverable. A quiet day currently produces a header-only CSV, and the counts only appear on the console.
+- Explain a difference in totals item by item, as a bridge from one total to the other.
 - Ask finance which Excel locale they use. A comma-delimited CSV opens in one column in Dutch-language Excel; the delimiter is a single constant in `report.py`.
 - A "possible counterpart" hint on rows without an ID: a suggestion for the person, never a match.
 - A way to mark an item as dealt with, so it does not sit open forever (the idea behind FIN-124), and a periodic list of everything still open.

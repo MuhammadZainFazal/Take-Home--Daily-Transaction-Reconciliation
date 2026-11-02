@@ -1,0 +1,11 @@
+Reconciliation summary for 2026-03-01
+
+Totals do NOT match.
+  Provider total      103,851.86
+  Ledger total        104,210.02
+  Difference              358.16  (ledger is higher)
+
+Read 1,986 provider rows and 1,986 ledger rows; 1,953 matched on ID.
+59 items to check, 0 resolved since the last run, 0 still open from earlier days (not repeated in the report).
+The items in the report show where the two sides disagree.
+Totals are the sums of the two files exported for this date. Amounts are in euros.
