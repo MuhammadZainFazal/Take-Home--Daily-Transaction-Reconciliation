@@ -14,3 +14,24 @@ class Transaction:
     amount_cents: int    # whole euro cents, exact
     timestamp: datetime  # timezone-aware, UTC
     merchant: str        # raw string from the source; the two systems never agree textually
+
+
+# Kinds of finding the reconciliation can produce.
+AMOUNT_DIFFERS = "amount_differs"            # same ID on both sides, different amount
+MISSING_IN_LEDGER = "missing_in_ledger"      # ID only in provider
+MISSING_IN_PROVIDER = "missing_in_provider"  # ID only in ledger
+DUPLICATE_ID = "duplicate_id"                # same ID, differing rows, on one side
+NO_ID = "no_id"                              # row has no ID, so it cannot be matched
+
+
+@dataclass(frozen=True)
+class Finding:
+    kind: str
+    key: str                          # stable across runs: same situation, same key
+    records: tuple[Transaction, ...]  # the rows involved, from both sides where relevant
+
+
+@dataclass(frozen=True)
+class Result:
+    findings: list[Finding]
+    matched: int  # IDs present once on each side with equal amounts
