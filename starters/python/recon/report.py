@@ -10,6 +10,7 @@ from .models import (
     MISSING_IN_LEDGER,
     MISSING_IN_PROVIDER,
     NO_ID,
+    UNEXPECTED_VALUE,
     Changes,
     Finding,
     Transaction,
@@ -32,6 +33,8 @@ ISSUES = [
      "In the ledger but not at the provider."),
     (NO_ID, "No transaction ID",
      "Cannot be matched automatically. Check by hand."),
+    (UNEXPECTED_VALUE, "Unexpected value",
+     "Left out of matching, so the other side may show as missing."),
 ]
 ISSUE = {kind: (title, note) for kind, title, note in ISSUES}
 ORDER = {kind: i for i, (kind, _, _) in enumerate(ISSUES)}
@@ -51,11 +54,12 @@ def _rows(status: str, f: Finding) -> list[list[str]]:
         p = next((t for t in group if t.source == "provider"), None)
         l = next((t for t in group if t.source == "ledger"), None)
         first = p or l
+        row_note = f"{first.problem[0].upper()}{first.problem[1:]}. {note}" if first.problem else note
         difference = ""
         if f.kind == AMOUNT_DIFFERS:
             gap = l.amount_cents - p.amount_cents
             difference = _money(abs(gap))
-            note = "Ledger is higher" if gap > 0 else "Provider is higher"
+            row_note = "Ledger is higher" if gap > 0 else "Provider is higher"
         rows.append([
             status,
             title,
@@ -67,7 +71,7 @@ def _rows(status: str, f: Finding) -> list[list[str]]:
             l.ref if l else "",
             _money(l.amount_cents) if l else "",
             difference,
-            note,
+            row_note,
         ])
     return rows
 

@@ -14,6 +14,7 @@ class Transaction:
     amount_cents: int    # whole euro cents, exact
     timestamp: datetime  # timezone-aware, UTC
     merchant: str        # raw string from the source; the two systems never agree textually
+    problem: str | None = None  # set when the row holds a value we don't expect (see normalize.py)
 
 
 # Kinds of finding the reconciliation can produce.
@@ -22,6 +23,7 @@ MISSING_IN_LEDGER = "missing_in_ledger"      # ID only in provider
 MISSING_IN_PROVIDER = "missing_in_provider"  # ID only in ledger
 DUPLICATE_ID = "duplicate_id"                # same ID, differing rows, on one side
 NO_ID = "no_id"                              # row has no ID, so it cannot be matched
+UNEXPECTED_VALUE = "unexpected_value"        # non-EUR currency, status not "captured", negative amount
 
 
 @dataclass(frozen=True)

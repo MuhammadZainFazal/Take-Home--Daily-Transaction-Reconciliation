@@ -10,6 +10,18 @@ from .models import Transaction
 LEDGER_TZ = ZoneInfo("Europe/Amsterdam")
 
 
+def _provider_problem(raw: dict, amount_cents: int) -> str | None:
+    """Anything the spec says should not happen. None when the row looks normal."""
+    problems = []
+    if raw.get("currency") != "EUR":
+        problems.append(f"currency is {raw.get('currency')}, expected EUR")
+    if raw.get("status") != "captured":
+        problems.append(f"status is {raw.get('status')}, expected captured")
+    if amount_cents < 0:
+        problems.append("amount is negative")
+    return "; ".join(problems) or None
+
+
 def normalize_provider(raw: dict, fallback_ref: str) -> Transaction:
     tid = raw.get("transaction_id") or None
     ts = datetime.strptime(raw["captured_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
@@ -20,6 +32,7 @@ def normalize_provider(raw: dict, fallback_ref: str) -> Transaction:
         amount_cents=int(raw["amount_cents"]),
         timestamp=ts,
         merchant=raw["merchant"],
+        problem=_provider_problem(raw, int(raw["amount_cents"])),
     )
 
 
@@ -34,4 +47,5 @@ def normalize_ledger(raw: dict) -> Transaction:
         amount_cents=cents,
         timestamp=local.astimezone(timezone.utc),
         merchant=raw["merchant"],
+        problem="amount is negative" if cents < 0 else None,
     )

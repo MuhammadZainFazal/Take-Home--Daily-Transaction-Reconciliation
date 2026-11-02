@@ -38,6 +38,7 @@ def _tx_to_dict(t: Transaction) -> dict:
         "amount_cents": t.amount_cents,
         "timestamp": t.timestamp.isoformat(),
         "merchant": t.merchant,
+        "problem": t.problem,
     }
 
 
@@ -49,6 +50,7 @@ def _tx_from_dict(d: dict) -> Transaction:
         amount_cents=d["amount_cents"],
         timestamp=datetime.fromisoformat(d["timestamp"]),
         merchant=d["merchant"],
+        problem=d.get("problem"),
     )
 
 

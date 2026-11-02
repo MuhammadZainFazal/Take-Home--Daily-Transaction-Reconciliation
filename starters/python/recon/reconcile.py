@@ -8,6 +8,7 @@ from .models import (
     MISSING_IN_LEDGER,
     MISSING_IN_PROVIDER,
     NO_ID,
+    UNEXPECTED_VALUE,
     Finding,
     Result,
     Transaction,
@@ -31,10 +32,21 @@ def _drop_exact_copies(rows: list[Transaction]) -> list[Transaction]:
 
 
 def reconcile(provider: list[Transaction], ledger: list[Transaction]) -> Result:
-    p_by_id, p_no_id = _split_by_id_presence(provider)
-    l_by_id, l_no_id = _split_by_id_presence(ledger)
     findings: list[Finding] = []
     matched = 0
+
+    # Rows with unexpected values are reported as they are, not reconciled.
+    flagged: dict[tuple[str, str], list[Transaction]] = defaultdict(list)
+    for t in provider + ledger:
+        if t.problem:
+            flagged[(t.source, t.ref)].append(t)
+    for (source, ref), rows in flagged.items():
+        findings.append(Finding(UNEXPECTED_VALUE, f"{UNEXPECTED_VALUE}:{source}:{ref}", tuple(rows)))
+    provider = [t for t in provider if not t.problem]
+    ledger = [t for t in ledger if not t.problem]
+
+    p_by_id, p_no_id = _split_by_id_presence(provider)
+    l_by_id, l_no_id = _split_by_id_presence(ledger)
 
     for t in p_no_id + l_no_id:
         findings.append(Finding(NO_ID, f"{NO_ID}:{t.source}:{t.ref}", (t,)))
