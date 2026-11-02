@@ -35,3 +35,9 @@ class Finding:
 class Result:
     findings: list[Finding]
     matched: int  # IDs present once on each side with equal amounts
+
+
+@dataclass(frozen=True)
+class Changes:
+    new: list[Finding]       # findings that were not open before this run
+    resolved: list[Finding]  # findings that were open and no longer apply
