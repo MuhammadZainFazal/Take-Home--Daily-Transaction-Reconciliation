@@ -3,20 +3,33 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections import Counter
 from pathlib import Path
 
 from .readers import load_day
+from .reconcile import reconcile
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parents[3] / "data"
+
+
+def _eur(cents: int) -> str:
+    return f"{cents // 100}.{cents % 100:02d}"
 
 
 def run(date: str, data_dir: Path) -> int:
     provider, ledger = load_day(data_dir, date)
     print(f"{date}: {len(provider)} provider records, {len(ledger)} ledger rows")
 
-    for tx in provider:
-        # This is where the exercise starts.
-        pass
+    result = reconcile(provider, ledger)
+    print(f"Matched on ID, same amount: {result.matched}")
+    print(f"Findings: {len(result.findings)}")
+    for kind, n in sorted(Counter(f.kind for f in result.findings).items()):
+        print(f"  {kind}: {n}")
+
+    # Temporary plain dump
+    for f in sorted(result.findings, key=lambda f: f.key):
+        rows = "; ".join(f"{t.source} {t.ref} EUR {_eur(t.amount_cents)} {t.merchant}" for t in f.records)
+        print(f"- {f.key} -> {rows}")
 
     return 0
 
