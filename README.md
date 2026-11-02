@@ -94,3 +94,7 @@ I used Claude throughout, as a sparring partner and for drafting, and kept the d
 - **Refactoring.** After review I had the code simplified, for example removing a redundant de-duplication step and cutting the report down to what finance needs.
 - **Verification.** I read every change before integrating it, kept in check diff between steps, and committed in small steps. Changes were checked against the provided data and small throwaway scenarios, and the basics are now covered by a small test suite. The tests were checked by deliberately breaking the code in a few ways (for example removing the re-run guard) to confirm they fail.
 - **Documentation.** Claude helped with the structure and wording of these documents. The content reflects the decisions above.
+
+## Future tickets
+
+FIN-121 ("does the total for yesterday match or not") is built on its own branch, `feature/fin-121`. The pull request explains how I read the ticket, what I would have asked Sanne, and why I picked it over the others.
