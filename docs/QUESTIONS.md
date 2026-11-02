@@ -51,10 +51,10 @@ Written so each can be sent to the person named and answered on its own. For eac
 **Why:** a comma-delimited CSV opens in a single column in Dutch-language Excel, which expects a semicolon (and a decimal comma). Also: is English right, are times in Amsterdam time right, and does the amount column need a currency symbol?
 **Until then:** comma delimiter, dot decimals, a UTF-8 marker, English text, Amsterdam time with seconds, plain amounts. The delimiter is one constant in `report.py`.
 
-### 10. Does finance need the summary counts in the file?
+### 10. Is the summary in the right place and shape?
 **Ask:** finance.
-**Why:** rows read, matched, and still open from earlier days are printed on the console only. On a day with nothing new the CSV has just a header, which could be mistaken for a failure.
-**Until then:** console only.
+**Why:** the answer to "does the total match", with the counts, is a short text file next to the CSV and is also printed on the console. Would finance rather see it at the top of the CSV, in an email, or somewhere else?
+**Until then:** a separate `summary-DATE.txt`.
 
 ### 11. How should a finding be closed by hand?
 **Ask:** finance.
@@ -82,3 +82,20 @@ Written so each can be sent to the person named and answered on its own. For eac
 **Ask:** engineering and finance.
 **Why:** should a row that cannot be read stop the run, or be skipped and reported? Should a zero amount be flagged?
 **Until then:** an unreadable row stops the run with an error. Zero amounts are not flagged.
+
+## About the totals check
+
+### 16. What does "the total for the day" cover?
+**Ask:** finance and the ledger owner.
+**Why:** the check compares the sums of the two files exported for that date. If the exports are cut differently, or something is booked a day later, the totals can differ without anything being wrong. Do they want the transactions that happened on the day instead?
+**Until then:** the sums of the two export files, as exported.
+
+### 17. Must the totals match to the cent?
+**Ask:** finance.
+**Why:** a tolerance (rounding, a known small difference) would turn some "no" answers into "yes".
+**Until then:** exact to the cent.
+
+### 18. What does the manager do with a "no"?
+**Ask:** finance.
+**Why:** if the difference alone is enough, we are done. If they want to know what explains it, the tool would need to break the difference down.
+**Until then:** the difference and the items are shown, but the difference is not broken down.
